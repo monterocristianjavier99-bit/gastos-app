@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GASTOS — REPARADO</title>
+<style>
+:root{--bg:#f7f5f2;--card:#fff;--ink:#252321;--muted:#77716d;--line:#e9e4df;--accent:#8c3448;--green:#26734d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.app{width:100%;max-width:720px;margin:auto;padding:env(safe-area-inset-top) 12px 20px}
+header{padding:14px 4px 12px}.brand{font:700 32px Georgia,serif;letter-spacing:3px}.sub{font-size:13px;color:var(--muted);margin-top:5px}
+.summary{background:var(--accent);color:#fff;border-radius:18px;padding:15px;margin-bottom:14px}.label{font-size:13px;opacity:.85}.big{font-size:34px;font-weight:750;margin:7px 0 16px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{border:1px solid #ffffff38;background:#ffffff16;border-radius:13px;padding:12px}.stat small{display:block;opacity:.8;margin-bottom:5px}.stat strong{font-size:17px}
+h2{font-size:18px;margin:14px 2px 9px}.card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:12px;margin-bottom:9px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;min-width:0}.field label{font-size:12px;font-weight:650;color:var(--muted)}input,select{font:inherit} .field input,.field select{width:100%;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 9px;background:#fff;color:var(--ink);font-size:16px;min-height:44px}.field input:focus,.field select:focus{outline:2px solid #8c344833;border-color:var(--accent)}.help{font-size:11px;color:var(--muted);margin:-3px 0 12px}
+button{font:inherit;cursor:pointer}.primary{width:100%;border:0;border-radius:11px;padding:12px;background:var(--accent);color:#fff;font-weight:700;font-size:15px}.notice{display:none;background:#fff1d6;color:#6a4a12;padding:10px 12px;border-radius:10px;margin-bottom:10px;font-size:13px}.notice.show{display:block}
+.row{display:flex;gap:11px;align-items:flex-start}.check{appearance:none;width:24px;height:24px;flex:0 0 24px;border:2px solid #c8c2bc;border-radius:50%;margin-top:2px;background:white;display:grid;place-items:center}.check:checked{background:var(--green);border-color:var(--green)}.check:checked:after{content:"✓";color:#fff;font-weight:700}.content{flex:1;min-width:0}.topline{display:flex;justify-content:space-between;gap:10px}.name{font-weight:700;overflow-wrap:anywhere}.amount{font-weight:750;white-space:nowrap}.meta{font-size:12px;color:var(--muted);margin-top:5px}.done .name{text-decoration:line-through;color:var(--muted)}.parts{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.part{border:1px solid var(--line);border-radius:10px;padding:7px 8px;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}.part input{appearance:none;width:17px;height:17px;border:1.5px solid #c8c2bc;border-radius:50%;margin:0}.part input:checked{background:var(--green);border-color:var(--green)}.progress{height:5px;background:#eee9e5;border-radius:9px;overflow:hidden;margin-top:11px}.progress span{height:100%;display:block;background:var(--green)}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}.smallbtn{background:white;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:12px}.empty{text-align:center;color:var(--muted);padding:28px 12px}.footer{font-size:11px;text-align:center;color:var(--muted);margin-top:14px}
+@media(max-width:380px){.grid{grid-template-columns:1fr 1fr}.big{font-size:29px}.stats{gap:7px}.stat{padding:9px}.brand{font-size:28px}.field label{font-size:11px}}
+</style>
+</head>
+<body>
+<main class="app">
+<header><div class="brand">GASTOS 2.0</div><div class="sub">FORMATO DE IMPORTES Y GUARDADO CORREGIDOS</div><div id="saveStatus" class="sub">Guardado local al agregar gastos</div></header>
+<section class="summary"><div class="label">Total de todos tus gastos</div><div class="big" id="total">$ 0</div><div class="stats"><div class="stat"><small>Ya pagaste</small><strong id="paid">$ 0</strong></div><div class="stat"><small>Te falta pagar</small><strong id="left">$ 0</strong></div></div></section>
+<h2>Agregar gasto</h2>
+<section class="card">
+<form id="form" novalidate>
+<div class="grid">
+<div class="field"><label for="expenseName">Nombre del gasto</label><input id="expenseName" type="text" maxlength="80" placeholder="Ej.: Luz, tarjeta" required></div>
+<div class="field"><label for="expenseAmount">Importe total ($)</label><input id="expenseAmount" type="text" inputmode="numeric" autocomplete="off" placeholder="Ej.: 25.000" required></div>
+<div class="field"><label for="category">Categoría</label><select id="category"><option>Tarjetas de crédito</option><option>Servicios</option><option>Cuotas y préstamos</option><option>Alquiler</option><option>Suscripciones</option><option>Otros gastos</option></select></div>
+<div class="field"><label for="kind">Forma de pago</label><select id="kind"><option value="once">Pago único</option><option value="installments">En cuotas</option></select></div>
+<div class="field" id="countField" style="display:none"><label for="count">Cantidad de cuotas</label><input id="count" type="number" inputmode="numeric" min="2" max="120" value="3"></div>
+<div class="field"><label for="due">Vencimiento (opcional)</label><input id="due" type="date"></div>
+</div>
+<div class="help">Los puntos se agregan automáticamente: 1000 → 1.000 · 20000 → 20.000</div>
+<div id="notice" class="notice" role="alert"></div>
+<button class="primary" type="submit">＋ Agregar gasto</button>
+</form>
+</section>
+<h2>Mis gastos <span id="qty" style="font-size:12px;font-weight:400;color:var(--muted)">(0 gastos)</span></h2>
+<div id="list"></div>
+<section class="card"><div style="display:flex;justify-content:space-between;gap:12px"><div><div class="label" style="color:var(--muted)">Total de gastos</div><strong id="totalBottom" style="font-size:21px">$ 0</strong></div><div style="text-align:right"><div class="label" style="color:var(--muted)" id="progressText">0 de 0 pagos</div><strong id="leftBottom" style="font-size:21px">$ 0</strong></div></div></section>
+<div class="footer">Los gastos se guardan en este navegador cuando el navegador permite almacenamiento. Para probar, agregá primero un gasto de ejemplo.</div>
+</main>
+<script>
+(function(){
+"use strict";
+const $ = id => document.getElementById(id);
+const STORAGE_KEY = "gastos_independiente_v3";
+let expenses = [];
+
+function readSaved(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const data = JSON.parse(raw);
+    return Array.isArray(data) ? data.filter(x => x && typeof x.name === "string" && Number.isFinite(Number(x.amount)) && Array.isArray(x.parts)) : [];
+  } catch (_) { return []; }
+}
+expenses = readSaved();
+
+function digitsOnly(s){ return String(s ?? "").replace(/\D/g, ""); }
+function formatThousands(s){
+  const digits = digitsOnly(s);
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+function parseAmount(s){
+  // The input is intentionally integer pesos; periods are thousands separators.
+  const digits = digitsOnly(s);
+  if (!digits) return NaN;
+  const n = Number(digits);
+  return Number.isSafeInteger(n) ? n : NaN;
+}
+function money(n){
+  return "$ " + Math.round(Number(n) || 0).toLocaleString("es-AR");
+}
+function saveAndRender(){
+  let saved = false;
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses)); saved = true; } catch (_) {}
+  const saveStatus = $("saveStatus");
+  if (saveStatus) saveStatus.textContent = saved ? "Guardado en este navegador" : "Este visor no permite guardar; abrí el archivo en Safari";
+  render();
+}
+function paidParts(e){ return e.parts.reduce((n, p) => n + (p ? 1 : 0), 0); }
+function paidAmount(e){
+  if (e.kind === "once") return e.parts[0] ? Number(e.amount) : 0;
+  return e.parts.length ? Number(e.amount) * paidParts(e) / e.parts.length : 0;
+}
+function node(tag, cls, text){
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+function render(){
+  const total = expenses.reduce((s,e) => s + Number(e.amount), 0);
+  const paid = expenses.reduce((s,e) => s + paidAmount(e), 0);
+  const remaining = Math.max(0, total - paid);
+  ["total","grandTotal","totalBottom","bottomTotal"].forEach(id => { if ($(id)) $(id).textContent = money(total); });
+  ["paid","paidTotal"].forEach(id => { if ($(id)) $(id).textContent = money(paid); });
+  ["left","leftTotal","remainingTotal","leftBottom","bottomRemaining"].forEach(id => { if ($(id)) $(id).textContent = money(remaining); });
+
+  const partCount = expenses.reduce((s,e) => s + e.parts.length, 0);
+  const doneCount = expenses.reduce((s,e) => s + paidParts(e), 0);
+  if ($("progressText")) $("progressText").textContent = `${doneCount} de ${partCount} pagos`;
+  if ($("bottomProgress")) $("bottomProgress").textContent = `${doneCount} de ${partCount} pagos`;
+  if ($("qty")) $("qty").textContent = `(${expenses.length} ${expenses.length === 1 ? "gasto" : "gastos"})`;
+
+  const list = $("list");
+  if (!list) return;
+  list.replaceChildren();
+  if (!expenses.length) {
+    const empty = node("section","card empty","Todavía no agregaste gastos. Cargá el primero arriba.");
+    list.append(empty);
+    return;
+  }
+  expenses.forEach(e => {
+    if (!Array.isArray(e.parts) || !e.parts.length) e.parts = [false];
+    const complete = paidParts(e) === e.parts.length;
+    const card = node("section","card");
+    const row = node("div","row" + (complete ? " done" : ""));
+    const master = node("input","check");
+    master.type = "checkbox"; master.checked = complete; master.setAttribute("aria-label","Marcar gasto como pagado");
+    master.addEventListener("change", () => { e.parts = e.parts.map(() => master.checked); saveAndRender(); });
+    const content = node("div","content");
+    const top = node("div","topline");
+    top.append(node("div","name",e.name), node("div","amount",money(e.amount)));
+    content.append(top);
+    let metaText = e.category || "Otros gastos";
+    metaText += e.kind === "installments" ? ` · ${paidParts(e)}/${e.parts.length} cuotas pagadas` : (complete ? " · Pagado" : " · Pendiente");
+    if (e.due) metaText += " · Vence " + new Date(e.due+"T12:00:00").toLocaleDateString("es-AR");
+    content.append(node("div","meta",metaText));
+    if (e.kind === "installments") {
+      const prog = node("div","progress"), bar = node("span");
+      bar.style.width = (paidParts(e) / e.parts.length * 100) + "%"; prog.append(bar); content.append(prog);
+      const parts = node("div","parts");
+      e.parts.forEach((val,i) => {
+        const label = node("label","part"), cb = node("input");
+        cb.type = "checkbox"; cb.checked = !!val; cb.setAttribute("aria-label",`Cuota ${i+1} pagada`);
+        cb.addEventListener("change", () => { e.parts[i] = cb.checked; saveAndRender(); });
+        label.append(cb,node("span","",`Cuota ${i+1} · ${money(Number(e.amount)/e.parts.length)}`)); parts.append(label);
+      });
+      content.append(parts);
+    }
+    const actions = node("div","actions");
+    const edit = node("button","smallbtn","Editar"), del = node("button","smallbtn","Eliminar");
+    edit.type = del.type = "button";
+    edit.addEventListener("click", () => {
+      const n = prompt("Nombre del gasto:",e.name); if (n === null) return;
+      const a = prompt("Importe total en pesos (podés escribir 25.000):",String(e.amount)); if (a === null) return;
+      const amount = parseAmount(a);
+      if (!n.trim() || !Number.isFinite(amount) || amount <= 0) { alert("Ingresá un nombre y un importe válido."); return; }
+      e.name = n.trim(); e.amount = amount; saveAndRender();
+    });
+    del.addEventListener("click", () => {
+      if (confirm(`¿Eliminar "${e.name}"?`)) { expenses = expenses.filter(x => x.id !== e.id); saveAndRender(); }
+    });
+    actions.append(edit,del); content.append(actions); row.append(master,content); card.append(row); list.append(card);
+  });
+}
+
+const amountInput = $("expenseAmount") || $("amount");
+if (amountInput) {
+  amountInput.type = "text";
+  amountInput.inputMode = "numeric";
+  amountInput.autocomplete = "off";
+  amountInput.setAttribute("pattern", "[0-9.]*");
+  amountInput.placeholder = "Ej.: 25.000";
+  let lastRawDigits = "";
+  const applyAmountFormat = () => {
+    const digits = digitsOnly(amountInput.value);
+    lastRawDigits = digits;
+    const formatted = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    if (amountInput.value !== formatted) {
+      amountInput.value = formatted;
+      try { amountInput.setSelectionRange(formatted.length, formatted.length); } catch (_) {}
+    }
+  };
+  amountInput.addEventListener("input", applyAmountFormat);
+  amountInput.addEventListener("change", applyAmountFormat);
+  amountInput.addEventListener("blur", applyAmountFormat);
+}
+const kindInput = $("kind");
+if (kindInput) kindInput.addEventListener("change", () => {
+  const field = $("countField") || $("installmentField");
+  if (field) field.style.display = kindInput.value === "installments" ? "flex" : "none";
+});
+
+const form = $("form") || $("expenseForm");
+if (form) {
+  form.noValidate = true;
+  form.addEventListener("submit", function(ev){
+    ev.preventDefault(); ev.stopPropagation();
+    const nameInput = $("expenseName") || $("name");
+    const amountEl = $("expenseAmount") || $("amount");
+    const name = nameInput.value.trim();
+    const amount = parseAmount(amountEl.value);
+    const kind = kindInput ? kindInput.value : "once";
+    const countInput = $("count") || $("installmentCount");
+    const count = kind === "installments" ? Number(countInput.value) : 1;
+    const notice = $("notice");
+    if (notice) { notice.textContent = ""; notice.classList.remove("show"); }
+    if (!name) { alert("Escribí el nombre del gasto."); nameInput.focus(); return; }
+    if (!Number.isFinite(amount) || amount <= 0) { alert("Ingresá un importe válido, por ejemplo 25.000."); amountEl.focus(); return; }
+    if (!Number.isInteger(count) || count < 1 || count > 120) { alert("Ingresá una cantidad de cuotas válida entre 2 y 120."); return; }
+
+    // Crucial: append the new expense, persist, and rerender BEFORE clearing the input fields.
+    const item = {
+      id: String(Date.now()) + "_" + Math.random().toString(36).slice(2,8),
+      name, amount,
+      category: $("category") ? $("category").value : "Otros gastos",
+      kind,
+      parts: Array.from({length:count}, () => false),
+      due: $("due") ? $("due").value : ""
+    };
+    expenses.unshift(item);
+    saveAndRender();
+
+    // Only clear form controls, never the data/list/totals.
+    nameInput.value = "";
+    amountEl.value = "";
+    if ($("due")) $("due").value = "";
+    if (kindInput) kindInput.value = "once";
+    if (countInput) countInput.value = "3";
+    const countField = $("countField") || $("installmentField");
+    if (countField) countField.style.display = "none";
+    if (notice) { notice.textContent = "Gasto agregado correctamente."; notice.classList.add("show"); }
+    try { nameInput.focus(); } catch (_) {}
+  });
+}
+render();
+})();
+</script>
+</body>
+</html>
