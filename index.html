@@ -429,6 +429,220 @@ header.top .pill,.top .pill{
 #page-bills .bill-history-open{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;background:transparent;color:#fff;border:0;padding:0;cursor:pointer;flex:1;min-width:0}
 #page-bills .bill-history-delete{flex:0 0 auto;background:#39445a;color:#fff;border:1px solid #7a879e;border-radius:8px;padding:6px 8px;cursor:pointer;font-size:12px}
 
+
+/* Fix contrast for saved expense cards on the slate-blue theme */
+#page-expenses .expense-card,
+#page-expenses .expense-item,
+#page-expenses .expense-row,
+#page-expenses .expense-name,
+#page-expenses .expense-title,
+#page-expenses .expense-meta,
+#page-expenses .expense-details,
+#page-expenses .expense-card strong,
+#page-expenses .expense-card span,
+#page-expenses .expense-card p,
+#page-expenses .expense-card small {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+#page-expenses .expense-card .muted,
+#page-expenses .expense-card .sub,
+#page-expenses .expense-card .secondary-text,
+#page-expenses .expense-card [class*="muted"],
+#page-expenses .expense-card [class*="meta"] {
+  color: #e6eaf1 !important;
+  opacity: 1 !important;
+}
+#page-expenses .expense-card input,
+#page-expenses .expense-card select {
+  color: #ffffff !important;
+}
+
+
+/* High-specificity, forced white text for expense names and saved expense rows */
+#page-expenses #expenseList,
+#page-expenses #expenseList *,
+#page-expenses #expensesList,
+#page-expenses #expensesList *,
+#page-expenses [id*="expense"] .expense-name,
+#page-expenses [id*="expense"] .expense-title,
+#page-expenses [id*="expense"] strong,
+#page-expenses [id*="expense"] span,
+#page-expenses [id*="expense"] p,
+#page-expenses [id*="expense"] small,
+#page-expenses [id*="expense"] div {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+#page-expenses .expense-list,
+#page-expenses .expense-list *,
+#page-expenses .expense-item,
+#page-expenses .expense-item *,
+#page-expenses .expense-card,
+#page-expenses .expense-card *,
+#page-expenses .gasto-item,
+#page-expenses .gasto-item *,
+#page-expenses .gasto-card,
+#page-expenses .gasto-card * {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+
+/* Polished installment controls: compact, slate-blue, readable */
+#expenseList .parts {
+  display:flex !important;
+  flex-wrap:wrap !important;
+  align-items:center !important;
+  gap:8px !important;
+  margin-top:12px !important;
+  padding-top:10px !important;
+  border-top:1px solid #68758b !important;
+}
+#expenseList .parts .part {
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:8px !important;
+  min-height:36px !important;
+  padding:7px 12px !important;
+  margin:0 !important;
+  border:1px solid #718099 !important;
+  border-radius:10px !important;
+  background:#202634 !important;
+  color:#ffffff !important;
+  -webkit-text-fill-color:#ffffff !important;
+  font-size:13px !important;
+  font-weight:600 !important;
+  line-height:1.2 !important;
+  cursor:pointer !important;
+  box-shadow:none !important;
+}
+#expenseList .parts .part span {
+  color:#ffffff !important;
+  -webkit-text-fill-color:#ffffff !important;
+  opacity:1 !important;
+}
+#expenseList .parts .part input[type="checkbox"] {
+  appearance:none !important;
+  -webkit-appearance:none !important;
+  display:inline-grid !important;
+  place-content:center !important;
+  flex:0 0 16px !important;
+  width:16px !important;
+  height:16px !important;
+  min-width:16px !important;
+  min-height:16px !important;
+  margin:0 !important;
+  padding:0 !important;
+  border:1.5px solid #d7deea !important;
+  border-radius:4px !important;
+  background:#39445a !important;
+  cursor:pointer !important;
+}
+#expenseList .parts .part input[type="checkbox"]::before {
+  content:"" !important;
+  width:8px !important;
+  height:8px !important;
+  transform:scale(0) !important;
+  transition:transform .12s ease-in-out !important;
+  background:#202634 !important;
+  box-shadow:inset 1em 1em #ffffff !important;
+  clip-path:polygon(14% 44%,0 65%,40% 100%,100% 16%,80% 0,37% 62%) !important;
+}
+#expenseList .parts .part input[type="checkbox"]:checked {
+  background:#ffffff !important;
+  border-color:#ffffff !important;
+}
+#expenseList .parts .part input[type="checkbox"]:checked::before {
+  transform:scale(1) !important;
+}
+#expenseList .parts .part:has(input[type="checkbox"]:checked) {
+  background:#46536b !important;
+  border-color:#aebbd0 !important;
+}
+#expenseList .expense-name,
+#expenseList .meta,
+#expenseList .amount {
+  color:#ffffff !important;
+  -webkit-text-fill-color:#ffffff !important;
+  opacity:1 !important;
+}
+@media(max-width:600px) {
+  #expenseList .parts {gap:6px !important}
+  #expenseList .parts .part {
+    min-height:34px !important;
+    padding:7px 10px !important;
+    font-size:12px !important;
+  }
+}
+
+
+/* Override the original .part styles directly: installment labels are <label class="part"> */
+#expenseList .parts label.part,
+#expenseList .parts label.part:visited,
+#expenseList .parts label.part:hover,
+#expenseList .parts label.part:focus-within {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 9px !important;
+  box-sizing: border-box !important;
+  min-height: 38px !important;
+  padding: 8px 12px !important;
+  margin: 0 !important;
+  background: #202634 !important;
+  border: 1px solid #718099 !important;
+  border-radius: 10px !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  opacity: 1 !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+}
+#expenseList .parts label.part span {
+  display: inline-block !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  white-space: nowrap !important;
+}
+#expenseList .parts label.part input[type="checkbox"] {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  box-sizing: border-box !important;
+  display: inline-block !important;
+  flex: 0 0 17px !important;
+  width: 17px !important;
+  height: 17px !important;
+  min-width: 17px !important;
+  min-height: 17px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 1.5px solid #dce3ee !important;
+  border-radius: 4px !important;
+  background: #39445a !important;
+  accent-color: #ffffff !important;
+}
+#expenseList .parts label.part input[type="checkbox"]:checked {
+  background: #ffffff !important;
+  border-color: #ffffff !important;
+  box-shadow: inset 0 0 0 4px #39445a !important;
+}
+#expenseList .parts label.part:has(input[type="checkbox"]:checked) {
+  background: #46536b !important;
+  border-color: #b5c1d3 !important;
+}
+@media (max-width: 600px) {
+  #expenseList .parts label.part { min-height: 35px !important; padding: 7px 10px !important; font-size: 12px !important; }
+}
+
 </style>
 </head>
 <body>
@@ -584,7 +798,11 @@ function renderExpenses(){
   const content=create("div","expensecontent"),line=create("div","linebetween");line.append(create("div","expense-name",e.name),create("div","amount",money(e.amount)));content.append(line);
   let meta=e.category||"Otros gastos";meta+=" · "+(e.kind==="installments"?`${paidParts(e)}/${partsCount(e)} cuotas pagadas`:e.kind==="recurring"?"Gasto fijo mensual":isPaid(e)?"Pagado":"Pendiente");if(e.due)meta+=" · Vence "+new Date(e.due+"T12:00:00").toLocaleDateString("es-AR");content.append(create("div","meta",meta));
   if(e.kind==="installments"){
-   const parts=create("div","parts");e.parts.forEach((val,i)=>{const label=create("label","part"),cb=create("input");cb.type="checkbox";cb.checked=!!val;cb.addEventListener("change",()=>{e.parts[i]=cb.checked;saveExpenses();refreshAll()});label.append(cb,create("span","",`Cuota ${i+1}`));parts.append(label)});content.append(parts)
+   const parts=create("div","parts");parts.style.setProperty("display","flex","important");parts.style.setProperty("flex-wrap","wrap","important");parts.style.setProperty("align-items","center","important");parts.style.setProperty("gap","8px","important");parts.style.setProperty("margin-top","12px","important");parts.style.setProperty("padding-top","10px","important");parts.style.setProperty("border-top","1px solid #68758b","important");e.parts.forEach((val,i)=>{const label=create("label","part"),cb=create("input"),partText=create("span","",`Cuota ${i+1}`);
+      label.style.setProperty("display","inline-flex","important");label.style.setProperty("align-items","center","important");label.style.setProperty("gap","8px","important");label.style.setProperty("padding","8px 12px","important");label.style.setProperty("margin","0","important");label.style.setProperty("min-height","38px","important");label.style.setProperty("background","#39445a","important");label.style.setProperty("border","1px solid #718099","important");label.style.setProperty("border-radius","10px","important");label.style.setProperty("color","#ffffff","important");label.style.setProperty("-webkit-text-fill-color","#ffffff","important");label.style.setProperty("font-size","13px","important");label.style.setProperty("font-weight","600","important");label.style.setProperty("opacity","1","important");
+      cb.type="checkbox";cb.checked=!!val;cb.style.setProperty("accent-color","#ffffff","important");cb.style.setProperty("width","17px","important");cb.style.setProperty("height","17px","important");cb.style.setProperty("margin","0","important");cb.style.setProperty("flex","0 0 17px","important");cb.addEventListener("change",()=>{e.parts[i]=cb.checked;saveExpenses();refreshAll()});
+      partText.style.setProperty("color","#ffffff","important");partText.style.setProperty("-webkit-text-fill-color","#ffffff","important");partText.style.setProperty("opacity","1","important");partText.style.setProperty("white-space","nowrap","important");
+      label.append(cb,partText);parts.append(label)});content.append(parts)
   }
   const actions=create("div","actions"),edit=create("button","btn outline small","Editar"),del=create("button","btn outline small","Eliminar");
   edit.addEventListener("click",()=>editExpense(e));del.addEventListener("click",()=>{if(confirm("¿Eliminar "+e.name+"?")){expenses=expenses.filter(x=>x.id!==e.id);saveExpenses();refreshAll()}});
