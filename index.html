@@ -644,6 +644,23 @@ header.top .pill,.top .pill{
 }
 
 </style>
+
+<style id="fix-completed-expense-card">
+/* Mantener las tarjetas de gastos gris azulado aunque todas las cuotas estén pagadas */
+#page-expenses #expenseList > .card,
+#page-expenses #expenseList > .card:has(.parts input[type="checkbox"]:checked),
+#page-expenses #expenseList > .card.paid,
+#page-expenses #expenseList > .card.completed {
+  background: #39445a !important; color: #ffffff !important; border-color: #59657a !important;
+}
+#page-expenses #expenseList > .card *,
+#page-expenses #expenseList > .card:has(.parts input[type="checkbox"]:checked) * { color: #ffffff !important; }
+#page-expenses #expenseList > .card .parts label.part,
+#page-expenses #expenseList > .card .parts label.part:has(input[type="checkbox"]:checked) {
+  background: #39445a !important; color: #ffffff !important; border-color: #59657a !important;
+}
+</style>
+
 </head>
 <body>
 <div class="app">
