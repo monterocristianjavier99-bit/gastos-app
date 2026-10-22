@@ -661,6 +661,17 @@ header.top .pill,.top .pill{
 }
 </style>
 
+
+<style id="fix-all-paid-expense-cards">
+/* Todos los gastos pagados: conservar tarjeta gris azulada y texto blanco */
+#page-expenses #expenseList > .card:has(input.roundcheck:checked) { background:#39445a !important; color:#fff !important; border-color:#59657a !important; }
+#page-expenses #expenseList > .card:has(input.roundcheck:checked) *,
+#page-expenses #expenseList > .card:has(input.roundcheck:checked) .expense-name,
+#page-expenses #expenseList > .card:has(input.roundcheck:checked) .amount,
+#page-expenses #expenseList > .card:has(input.roundcheck:checked) .meta { color:#fff !important; -webkit-text-fill-color:#fff !important; opacity:1 !important; }
+#page-expenses #expenseList > .card:has(input.roundcheck:checked) .parts label.part { background:#39445a !important; color:#fff !important; -webkit-text-fill-color:#fff !important; border-color:#718099 !important; }
+</style>
+
 </head>
 <body>
 <div class="app">
