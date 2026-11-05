@@ -815,7 +815,13 @@ function refreshAll(){renderExpenses();renderMonth();renderStats()}
 function renderExpenses(){
  const total=expenses.reduce((s,e)=>s+totalOf(e),0),paid=expenses.reduce((s,e)=>s+paidOf(e),0);
  $("total").textContent=money(total);$("paid").textContent=money(paid);$("remaining").textContent=money(Math.max(0,total-paid));
- const filtered=expenses.slice();
+ // Mostrar los gastos en el orden en que se fueron agregando:
+ // el primero arriba y cada gasto nuevo debajo del anterior.
+ const filtered=expenses.slice().sort((a,b)=>{
+  const timeA=Number(String(a.id||"").match(/^\d+/)?.[0]||0);
+  const timeB=Number(String(b.id||"").match(/^\d+/)?.[0]||0);
+  return timeA-timeB;
+ });
  $("expenseCount").textContent=filtered.length+" gastos";
  const list=$("expenseList");list.replaceChildren();
  if(!filtered.length){list.append(create("div","card empty","Todavía no agregaste gastos."));return}
@@ -856,7 +862,7 @@ $("kind").addEventListener("change",updateCalc);$("expenseAmount").addEventListe
 $("expenseForm").addEventListener("submit",ev=>{
  ev.preventDefault();const name=$("expenseName").value.trim(),entered=parseMoney($("expenseAmount").value),kind=$("kind").value,count=kind==="installments"?Number($("installmentCount").value):1,total=kind==="installments"?entered*count:entered;
  if(!name){alert("Escribí el nombre del gasto.");return}if(!Number.isSafeInteger(entered)||entered<=0||!Number.isSafeInteger(total)||total<=0){alert("Ingresá un importe válido.");return}if(kind==="installments"&&(!Number.isInteger(count)||count<2||count>120)){alert("Ingresá entre 2 y 120 cuotas.");return}
- expenses.unshift({id:String(Date.now())+Math.random().toString(36).slice(2),name,amount:total,category:$("category").value,kind,parts:Array.from({length:count},()=>false),due:"",createdAt:new Date().toISOString().slice(0,10),installmentAmount:kind==="installments"?entered:null});
+ expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2),name,amount:total,category:$("category").value,kind,parts:Array.from({length:count},()=>false),due:"",createdAt:new Date().toISOString().slice(0,10),installmentAmount:kind==="installments"?entered:null});
  saveExpenses();$("expenseForm").reset();$("installmentCount").value=3;updateCalc();refreshAll()
 });
 
