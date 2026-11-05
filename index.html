@@ -864,6 +864,15 @@ function renderBillHistory(){
  const box=$("billHistoryList"); if(!box) return; box.replaceChildren();
  // Persist the currently visible month before building the list.
  billMonths[activeBillMonth]=bills.map(b=>({...b}));
+ try{
+  localStorage.setItem(BILL_MONTHS_KEY,JSON.stringify(billMonths));
+  localStorage.setItem(BILL_KEY,JSON.stringify(bills));
+ }catch(e){
+  console.warn("No se pudo persistir el historial de facturas",e);
+  const notice=$("billNotice");
+  if(notice) notice.textContent="No se pudieron guardar las facturas en este navegador. Revisá el espacio disponible.";
+ }
+
  const keys=Object.keys(billMonths).filter(k=>/^\d{4}-\d{2}$/.test(k)).sort().reverse();
  if(!keys.length){box.append(create("div","bill-history-empty","Todavía no hay meses guardados."));return;}
  keys.forEach(key=>{
@@ -986,6 +995,13 @@ $("clearBillHistory").addEventListener("click",()=>{
 });
 $("saveBills").addEventListener("click",()=>{saveBillData();$("billNotice").textContent="Facturas guardadas en este navegador.";setTimeout(()=>{$("billNotice").textContent=""},3000)});
 $("resetBillNames").addEventListener("click",()=>{if(confirm("¿Restaurar los siete servicios iniciales? Se perderán las filas adicionales, pero no los gastos.")){const old=bills; bills=defaultBills.map((d,i)=>({...d,amount:old[i]?old[i].amount:0}));saveBillData();renderBills()}});
+
+// Guardado de respaldo al salir o pasar la app a segundo plano (Safari/iPhone).
+window.addEventListener("pagehide",()=>{try{saveBillMonth()}catch(e){}});
+document.addEventListener("visibilitychange",()=>{
+ if(document.visibilityState==="hidden"){try{saveBillMonth()}catch(e){}}
+});
+
 function renderMonth(){
  const month=$("monthPicker").value||currentMonth();const items=expenses.filter(e=>monthOfDate(e.due||e.createdAt)===month);const total=items.reduce((s,e)=>s+totalOf(e),0),paid=items.reduce((s,e)=>s+paidOf(e),0);
  $("monthTotal").textContent=money(total);$("monthPaid").textContent=money(paid);$("monthPending").textContent=money(Math.max(0,total-paid));$("monthDueCount").textContent=items.filter(e=>e.due&&monthOfDate(e.due)===month&&!isPaid(e)).length;
