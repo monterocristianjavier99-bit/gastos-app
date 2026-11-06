@@ -672,7 +672,15 @@ header.top .pill,.top .pill{
 #page-expenses #expenseList > .card:has(input.roundcheck:checked) .parts label.part { background:#39445a !important; color:#fff !important; -webkit-text-fill-color:#fff !important; border-color:#718099 !important; }
 </style>
 
-</head>
+
+<style id="manual-expense-order-controls">
+#page-expenses #expenseList .reorder-btn{
+ min-width:34px!important;width:34px!important;padding:6px 0!important;
+ font-size:17px!important;font-weight:800!important;line-height:1!important;
+}
+#page-expenses #expenseList .actions{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:6px!important}
+</style>
+\n</head>
 <body>
 <div class="app">
 <header class="top"><div><div class="brand" id="topBrand">GASTOS 2.0</div><div class="sub" id="topSubtitle">Tus cuentas, claras y ordenadas</div></div><span class="pill">MI CONTROL</span></header>
@@ -691,7 +699,10 @@ header.top .pill,.top .pill{
     <div class="hint" id="amountHint">Si es en cuotas, ingresá el importe de cada cuota.</div><div class="hint" id="calcPreview"></div>
     <button class="btn primary" type="submit" style="margin-top:10px">＋ Agregar gasto</button>
   </form></section>
-  <div class="linebetween"><h2>Listado</h2><span class="sub" id="expenseCount">0 gastos</span></div><div id="expenseList"></div>
+  <div class="linebetween"><h2>Listado</h2><span class="sub" id="expenseCount">0 gastos</span></div>
+  <button class="btn primary" id="saveExpensesBtn" type="button" style="margin:0 0 10px">💾 Guardar gastos</button>
+  <div class="notice" id="expenseSaveNotice" aria-live="polite"></div>
+  <div id="expenseList"></div>
 </section>
 
 <section class="page" id="page-bills">
@@ -804,7 +815,16 @@ function selectBillMonth(key){
 }
 
 function saveExpenses(){try{localStorage.setItem(EXPENSE_KEY,JSON.stringify(expenses))}catch(e){alert("El navegador no permitió guardar los gastos. Exportá una copia de seguridad.")}}
+$("saveExpensesBtn").addEventListener("click",()=>{
+ saveExpenses();
+ const notice=$("expenseSaveNotice");
+ notice.textContent="✓ Gastos guardados en este navegador.";
+ setTimeout(()=>{notice.textContent=""},3000);
+});
 function saveBillData(){saveBillMonth()}
+// Guardado adicional al salir o al mandar la app al segundo plano.
+window.addEventListener("pagehide",()=>{saveExpenses();saveBillData()});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){saveExpenses();saveBillData()}});
 function paidParts(e){return Array.isArray(e.parts)?e.parts.filter(Boolean).length:0}
 function partsCount(e){return Array.isArray(e.parts)&&e.parts.length?e.parts.length:1}
 function totalOf(e){return Number(e.amount)||0}
@@ -815,13 +835,15 @@ function refreshAll(){renderExpenses();renderMonth();renderStats()}
 function renderExpenses(){
  const total=expenses.reduce((s,e)=>s+totalOf(e),0),paid=expenses.reduce((s,e)=>s+paidOf(e),0);
  $("total").textContent=money(total);$("paid").textContent=money(paid);$("remaining").textContent=money(Math.max(0,total-paid));
- // Mostrar los gastos en el orden en que se fueron agregando:
- // el primero arriba y cada gasto nuevo debajo del anterior.
- const filtered=expenses.slice().sort((a,b)=>{
-  const timeA=Number(String(a.id||"").match(/^\d+/)?.[0]||0);
-  const timeB=Number(String(b.id||"").match(/^\d+/)?.[0]||0);
-  return timeA-timeB;
- });
+ // Orden manual persistente. Los gastos antiguos se inicializan en orden de carga.
+ if(expenses.some(e=>!Number.isFinite(Number(e.sortOrder)))){
+  const initial=expenses.slice().sort((a,b)=>
+   (Number(String(a.id||"").slice(0,13))||0)-(Number(String(b.id||"").slice(0,13))||0)
+  );
+  initial.forEach((e,i)=>{if(!Number.isFinite(Number(e.sortOrder)))e.sortOrder=i;});
+  saveExpenses();
+ }
+ const filtered=expenses.slice().sort((a,b)=>Number(a.sortOrder)-Number(b.sortOrder));
  $("expenseCount").textContent=filtered.length+" gastos";
  const list=$("expenseList");list.replaceChildren();
  if(!filtered.length){list.append(create("div","card empty","Todavía no agregaste gastos."));return}
@@ -838,9 +860,23 @@ function renderExpenses(){
       partText.style.setProperty("color","#ffffff","important");partText.style.setProperty("-webkit-text-fill-color","#ffffff","important");partText.style.setProperty("opacity","1","important");partText.style.setProperty("white-space","nowrap","important");
       label.append(cb,partText);parts.append(label)});content.append(parts)
   }
-  const actions=create("div","actions"),edit=create("button","btn outline small","Editar"),del=create("button","btn outline small","Eliminar");
+  const actions=create("div","actions");
+  const up=create("button","btn outline small reorder-btn","↑"),down=create("button","btn outline small reorder-btn","↓");
+  const edit=create("button","btn outline small","Editar"),del=create("button","btn outline small","Eliminar");
+  up.type=down.type=edit.type=del.type="button";
+  up.title="Mover gasto hacia arriba";up.setAttribute("aria-label","Mover "+e.name+" hacia arriba");
+  down.title="Mover gasto hacia abajo";down.setAttribute("aria-label","Mover "+e.name+" hacia abajo");
+  const moveExpense=(direction)=>{
+   const index=filtered.findIndex(x=>x.id===e.id),target=index+direction;
+   if(target<0||target>=filtered.length)return;
+   const other=filtered[target],currentOrder=e.sortOrder;
+   e.sortOrder=other.sortOrder;other.sortOrder=currentOrder;
+   saveExpenses();renderExpenses();
+  };
+  up.addEventListener("click",()=>moveExpense(-1));
+  down.addEventListener("click",()=>moveExpense(1));
   edit.addEventListener("click",()=>editExpense(e));del.addEventListener("click",()=>{if(confirm("¿Eliminar "+e.name+"?")){expenses=expenses.filter(x=>x.id!==e.id);saveExpenses();refreshAll()}});
-  actions.append(edit,del);content.append(actions);row.append(check,content);card.append(row);list.append(card)
+  actions.append(up,down,edit,del);content.append(actions);row.append(check,content);card.append(row);list.append(card)
  })
 }
 function editExpense(e){
@@ -862,7 +898,7 @@ $("kind").addEventListener("change",updateCalc);$("expenseAmount").addEventListe
 $("expenseForm").addEventListener("submit",ev=>{
  ev.preventDefault();const name=$("expenseName").value.trim(),entered=parseMoney($("expenseAmount").value),kind=$("kind").value,count=kind==="installments"?Number($("installmentCount").value):1,total=kind==="installments"?entered*count:entered;
  if(!name){alert("Escribí el nombre del gasto.");return}if(!Number.isSafeInteger(entered)||entered<=0||!Number.isSafeInteger(total)||total<=0){alert("Ingresá un importe válido.");return}if(kind==="installments"&&(!Number.isInteger(count)||count<2||count>120)){alert("Ingresá entre 2 y 120 cuotas.");return}
- expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2),name,amount:total,category:$("category").value,kind,parts:Array.from({length:count},()=>false),due:"",createdAt:new Date().toISOString().slice(0,10),installmentAmount:kind==="installments"?entered:null});
+ expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2),sortOrder:expenses.reduce((m,x)=>Math.max(m,Number(x.sortOrder)||0),-1)+1,name,amount:total,category:$("category").value,kind,parts:Array.from({length:count},()=>false),due:"",createdAt:new Date().toISOString().slice(0,10),installmentAmount:kind==="installments"?entered:null});
  saveExpenses();$("expenseForm").reset();$("installmentCount").value=3;updateCalc();refreshAll()
 });
 
